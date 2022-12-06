@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import AuthRoles from "../authRoles";
+import AuthRoles from "../utils/authRoles";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken"; 
-
+import config from "../config";
 const userSchema= mongoose.Schema(
     {
     name:{
@@ -37,6 +37,7 @@ const userSchema= mongoose.Schema(
 
 // encrypt password
 userSchema.pre("save",async function(next){
+    // this function will run on each time you are saving something in  database even if i will modify name then it will also run  so to solve his we uses isModified method 
     if(this.isModified("password")){ 
         this.password=await bcryptjs.hash(this.password,10)
         return next()
@@ -44,5 +45,28 @@ userSchema.pre("save",async function(next){
     return next() 
 })
 
+// adding more functionality directly to userSchema
+
+userSchema.methods={
+    // compare password
+    comparePassword:async function(enteredPassword){
+        return await bcryptjs.compare(enteredPassword,this.password)
+    },
+
+    // create JWT token 
+    getJwtToken:  function(){
+        return jwt.sign(
+            {
+                _id:this._id,
+                role:this.role
+            },
+            config.JWT_SECRET,
+            {
+                expiresIn:config.JWT_EXPIRY
+            }
+
+            )
+    }
+}
 
 export default mongoose.model("user",userSchema)
