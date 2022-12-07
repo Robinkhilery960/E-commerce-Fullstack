@@ -40,4 +40,10 @@ const orderSchema = new mongoose.Schema({
     enum: Object.values(OrderStatus),
     default: OrderStatus.ORDERED,
   },
-});
+},
+{
+    timestamps:true
+}
+);
+
+export default mongoose.model("Order",orderSchema)
