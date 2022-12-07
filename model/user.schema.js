@@ -34,6 +34,7 @@ const userSchema= mongoose.Schema(
     {
         timestamps:true
     }
+    //TODO: add a ststus fiedl if admin want to set status to a user like ["DISABLED", "BLOCK", "ONLINE", "OFFLINE"]
 )
 
 
