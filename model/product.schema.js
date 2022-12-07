@@ -35,6 +35,10 @@ const productSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Collection"  // ref should be same that you have used while creating model 
     }
-})
+},
+{
+  timestamps:true
+}
+)
 
 export default mongoose.model("Product",productSchema)
