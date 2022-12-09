@@ -2,6 +2,38 @@ import Collection from "../model/collection.schema"
 import asyncHandler from "../services/asyncHandler"
 import CustomError from "../utils/customError"
 
+
+
+/******************************************************
+ * @CREATE_COLLECTION
+ * @request_type  POST
+ * @route http://localhost:4000/api/collection/create 
+ * @description creating collection to  databse    
+ * @parameters   name
+ * @returns    created collection
+ ******************************************************/
+
+export const createCollection=asyncHandler(async(req,res)=>{
+    // grab data from client
+    const {name}=req.body
+    if(!name){
+        throw new CustomError("Please provide name of collection",401)
+    }
+    
+    try {
+        const collection= await Collection.create({name}) 
+        res.status(201).json({
+            success:true,
+            collection
+        })
+    } catch (error) {
+        throw new CustomError("collction creation failed",401)
+          
+    }
+   
+})
+
+
 /******************************************************
  * @GET_COLLECTION
  * @request_type  GET
@@ -56,3 +88,5 @@ export const updateCollection=asyncHandler(async(req,res)=>{
         collection
     })
 })
+
+
