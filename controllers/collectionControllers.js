@@ -90,3 +90,32 @@ export const updateCollection=asyncHandler(async(req,res)=>{
 })
 
 
+/******************************************************
+ * @DELETE_COLLECTION
+ * @request_type  DELETE
+ * @route http://localhost:4000/api/collection/delete 
+ * @description getting collection from databse  and deleting it 
+ * @parameters   collectionId  
+ * @returns   updated collection
+ ******************************************************/
+
+
+export const deleteCollection=asyncHandler(async(req,res)=>{
+    // grab data from client 
+    const {collectionId}=req.params 
+    if(!(collectionId )){
+        throw new CustomError("Please provide collectionId ",401)
+    }
+    // grab collection from databse and update it 
+    const collection=await Collection.findByIdAndDelete(collectionId)
+    if(!collection){ 
+        throw new CustomError("Collection not found",404)
+    }
+    //TODO: check what you afe getting as response a updated collection or old one 
+    res.status(201).json({
+        success:true,
+        message:"collection is deleted",
+        collection
+    })
+})
+
