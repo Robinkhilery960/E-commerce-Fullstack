@@ -3,7 +3,8 @@ import CustomError from "../utils/customError";
 import asyncHandler from "../services/asyncHandler";
 import cookieOptions from "../utils/cookieOptions";
 import mailHelper from "../utils/mailHelper";
-import crypto from "crypto" 
+import crypto from "crypto";
+import { isLoggedin } from "../middlewares/auth.middleware";
 
 /******************************************************
  * @SIGNUP
@@ -27,7 +28,7 @@ export const signUp = asyncHandler(async (req, res) => {
     // check if user already exist or not
     const existingUser = await findOne({ email });
     if (existingUser) {
-      throw new  CustomError("User already exists", 400);
+      throw new CustomError("User already exists", 400);
     }
 
     // if not create a user
@@ -167,8 +168,8 @@ export const forgotPassword = asyncHandler(async () => {
     });
   } catch (error) {
     // clear fields and save
-    user.forgotPasswordToken = undefined,
-      user.forgotPasswordTokenExpiry = undefined,
+    (user.forgotPasswordToken = undefined),
+      (user.forgotPasswordTokenExpiry = undefined),
       console.log("ERROR", error);
     await user.save({ validateBeforeSave: false });
     throw new CustomError("Email sent failure ", 424);
@@ -200,31 +201,72 @@ export const resetPassword = async () => {
     .update(resetToken)
     .digest("hex");
   //find user with this hashedResetToken
- // if both the condition below will be true only then it will return you a user  
-  const user=await User.findOne({
-    forgotPasswordToken:hashedResetToken,
-    forgotPasswordExpiry:{$gt:Date.now()}
-  }) 
+  // if both the condition below will be true only then it will return you a user
+  const user = await User.findOne({
+    forgotPasswordToken: hashedResetToken,
+    forgotPasswordExpiry: { $gt: Date.now() },
+  });
 
-  if(!user){
-    throw new CustomError("Token is Invalid or Expired",498)
+  if (!user) {
+    throw new CustomError("Token is Invalid or Expired", 498);
   }
 
   // update the password
-  user.password=password
-  user.forgotPasswordToken = undefined,
-  user.forgotPasswordTokenExpiry = undefined,
-
-  await user.save({ validateBeforeSave: false });
+  user.password = password;
+  (user.forgotPasswordToken = undefined),
+    (user.forgotPasswordTokenExpiry = undefined),
+    await user.save({ validateBeforeSave: false });
 
   // create token and send cookies
-   const token=user.getJwtToken()
-   user.password=undefined
-   res.cookie("token",token,cookieOptions)
-   res.status(201).json({
-    success:true,
-    user
-   })
-
+  const token = user.getJwtToken();
+  user.password = undefined;
+  res.cookie("token", token, cookieOptions);
+  res.status(201).json({
+    success: true,
+    user,
+  });
 };
+
 // TODO: create a controller for change password
+
+/******************************************************
+ * @CHANGE_PASSWORD
+ * @request_type  POST
+ * @route http://localhost:4000/api/auth/password/change
+ * @description  based upon entered password if mactch you can update
+ * @parameters   oldPassword and newPassword
+ * @returns  success message  password change
+ ******************************************************/
+
+export const changePassword = asyncHandler(async (req, res) => {
+  //TODO: how to use middleware here
+  // collect new password
+  const { oldPassword, newPassword } = req.body;
+  // below step is only possible when middleware is already in action before tbis function
+  const { userId } = req.user._id;
+  // find user
+  const user = await User.findById(userId);
+  // compare old password with user password
+  const isMatched = await user.comparePassword(oldPassword);
+  if (!isMatched) {
+    throw new CustomError("Please provide corret password", 401);
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  res.status(201).json({
+    success: true,
+    message: "Password changes successfully",
+  });
+});
+
+/******************************************************
+ * @GET_PROFILE
+ * @request_type  GET
+ * @route http://localhost:4000/api/auth/profile
+ * @description  basked upon token user will be avble to access profile
+ * @parameters  resetToken from url,password,confirmPasswrod
+ * @returns  success email send
+ ******************************************************/
+
+export const getProfile = asyncHandler(async (req, res) => {});
