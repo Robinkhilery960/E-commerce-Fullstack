@@ -226,8 +226,7 @@ export const resetPassword = async () => {
     user,
   });
 };
-
-// TODO: create a controller for change password
+ 
 
 /******************************************************
  * @CHANGE_PASSWORD
@@ -243,6 +242,9 @@ export const changePassword = asyncHandler(async (req, res) => {
   // collect new password
   const { oldPassword, newPassword } = req.body;
   // below step is only possible when middleware is already in action before tbis function
+  if(!(oldPassword || newPassword)){ 
+    throw new CustomError("Please provide new  password", 401);
+  }
   const { userId } = req.user._id;
   // find user
   const user = await User.findById(userId);
