@@ -120,3 +120,4 @@ export const logout=asyncHandler(async(_req,res)=>{
         message:"Logged out"
       })
 })
+
