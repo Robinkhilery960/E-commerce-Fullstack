@@ -7,14 +7,8 @@ const mailHelper=async(options)=>{
         to:options.email,
         subject:options.subject,
         text:options.text,
-   }
-    try { 
-        await transporter.sendMail(message)
-        console.log("Mail sent successfully");
-    } catch (error) {
-        console.log("ERROR",error);
-        throw CustomError("Mail not sent",554)
-    }
+   }   
+        await transporter.sendMail(message) 
 }
 
 export default mailHelper
