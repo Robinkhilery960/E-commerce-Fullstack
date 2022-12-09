@@ -29,4 +29,30 @@ export const getCollection=asyncHandler(async(req,res)=>{
     })
 })
 
+/******************************************************
+ * @UPDATE_COLLECTION
+ * @request_type  POST
+ * @route http://localhost:4000/api/collection/update 
+ * @description getting collection from databse  and updating it 
+ * @parameters   collectionId and data used to update 
+ * @returns   updated collection
+ ******************************************************/
 
+export const updateCollection=asyncHandler(async(req,res)=>{
+    // grab data from client 
+    const {collectionId}=req.params
+    const {data}=req.body
+    if(!(collectionId || data)){
+        throw new CustomError("Please provide sufficent information ",401)
+    }
+    // grab collection from databse and update it 
+    const collection=await Collection.findByIdAndUpdate(collectionId,data)
+    if(!collection){ 
+        throw new CustomError("Collection not found",404)
+    }
+    //TODO: check what you afe getting as response a updated collection or old one 
+    res.status(201).json({
+        success:true,
+        collection
+    })
+})
